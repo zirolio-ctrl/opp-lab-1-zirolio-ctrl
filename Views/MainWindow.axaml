@@ -1,0 +1,139 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="using:FluentAvalonia.UI.Controls"
+        Width="950" Height="700" Background="#242424"
+        x:Class="opp_lab_1_zirolio_ctrl.Views.MainWindow"
+        Title="Table editor">
+
+    <Window.Styles>
+        <Style Selector="Border.cell">
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="CornerRadius" Value="0"/>
+            
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+
+            <Setter Property="Background" Value="#2A2A2A"/>
+            
+            <Setter Property="BorderBrush" Value="#3D3D3D"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+        </Style>
+
+        <Style Selector="Border.cell Button">
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="Padding" Value="2"/>
+            <Setter Property="MinWidth" Value="0"/>
+            <Setter Property="MinHeight" Value="0"/>
+
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="#3D3D3D"/>
+            <Setter Property="Foreground" Value="#E0E0E0"/>
+            
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="0"/>
+            
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            
+            <Setter Property="Transitions">
+                <Transitions/>
+            </Setter>
+        </Style>
+
+        <Style Selector="Border.cell Button:pointerover">
+            <Setter Property="Background" Value="#3D3D3D"/>
+            <Setter Property="Foreground" Value="#E0E0E0"/>
+            <Setter Property="Transitions">
+                <Transitions/>
+            </Setter>
+        </Style>
+
+        <Style Selector="Border.header-cell">
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+
+            <Setter Property="Background" Value="#222222"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            
+            <Setter Property="BorderBrush" Value="#3D3D3D"/>
+            <Setter Property="BorderThickness" Value="0,0,1,1"/>
+            
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+        </Style>
+
+        <Style Selector="Border.header-cell TextBlock">
+            <Setter Property="Foreground" Value="#888888"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Background" Value="Transparent"/>
+
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="Auto, *, Auto" Margin="16" RowSpacing="12">
+        <Border Grid.Row="0" Background="#303030" CornerRadius="8" Padding="10">
+            <Grid RowDefinitions="Auto, Auto" RowSpacing="8">
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="6">
+                    <Button Content="+ Рядок" Click="OnAddRowClicked" ToolTip.Tip="Додати рядок в кінець"/>
+                    <Button Content="-- Рядок" Click="OnRemoveRowClicked" ToolTip.Tip="Видалити останній рядок"/>
+                    <Separator Width="1" Background="#444" Margin="4,2"/>
+                    <Button Content="+ Стовпець" Click="OnAddColClicked" ToolTip.Tip="Додати стовпець в кінець"/>
+                    <Button Content="-- Стовпець" Click="OnRemoveColClicked" ToolTip.Tip="Видалити останній стовпець"/>
+                    <Separator Width="1" Background="#444" Margin="4,2"/>
+                    <Button Content="Очистити" Click="OnClearTableClicked" ToolTip.Tip="Очистити всі дані"/>
+
+                    <Separator Width="1" Background="#444" Margin="4,2"/>
+
+                    <Button Content="Імпорт" Click="OnImportClicked" ToolTip.Tip="Імпортувати дані з гугл диску"/>
+                    <Button Content="Експорт" Click="OnExportClicked" ToolTip.Tip="Експортувати таблицю у гугл диск"/>
+                </StackPanel>
+
+                <Grid Grid.Row="1" ColumnDefinitions="Auto, *, Auto" ColumnSpacing="10">
+                    <TextBlock  x:Name="SelectedCellLabel"
+                                Text="A1:"
+                                FontWeight="Bold"
+                                FontSize="16"
+                                VerticalAlignment="Center"/>
+
+                    <TextBox    x:Name="FormulaEntry"
+                                Grid.Column="1"
+                                PlaceholderText="Введіть значення або формулу (наприклад, = A1 + 10 * 2^3)"
+                                KeyUp="OnFormulaKeyed"/>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="1"
+                Background="#242424"
+                BorderBrush="#3D3D3D"
+                BorderThickness="1"
+                CornerRadius="4"
+                Padding="0"
+                ClipToBounds="True">
+
+            <ScrollViewer
+                HorizontalScrollBarVisibility="Hidden"
+                VerticalScrollBarVisibility="Hidden">
+
+                <Grid x:Name="SpreadsheetGrid"
+                    RowDefinitions="Auto"
+                    ColumnDefinitions="Auto"
+                    RowSpacing="0"
+                    ColumnSpacing="0"
+                    Margin="0"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"/>
+
+            </ScrollViewer>
+        </Border>
+
+        <Border Grid.Row="2" Background="#303030" CornerRadius="6" Padding="8,4">
+            <TextBlock x:Name="StatusLabel" Text="Готово" FontSize="12" Foreground="Gray"/>
+        </Border>
+    </Grid>
+</Window>

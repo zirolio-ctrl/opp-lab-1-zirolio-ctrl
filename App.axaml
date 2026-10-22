@@ -1,0 +1,15 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="using:opp_lab_1_zirolio_ctrl"
+             xmlns:sty="using:FluentAvalonia.Styling"
+             x:Class="opp_lab_1_zirolio_ctrl.App"
+             RequestedThemeVariant="Default">
+
+    <Application.DataTemplates>
+        <local:ViewLocator />
+    </Application.DataTemplates>
+
+    <Application.Styles>
+        <sty:FluentAvaloniaTheme />
+    </Application.Styles>
+</Application>

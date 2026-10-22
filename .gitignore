@@ -1,0 +1,59 @@
+
+# Build output
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+artifacts/
+
+# Visual Studio / Rider
+.vs/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.DotSettings.user
+
+# VS Code
+.vscode/
+
+# Avalonia / generated files
+Generated/
+*.g.cs
+*.g.i.cs
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Google Drive OAuth credentials and tokens
+credentials.json
+token.json
+token.json/
+*.credentials.json
+client_secret*.json
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
