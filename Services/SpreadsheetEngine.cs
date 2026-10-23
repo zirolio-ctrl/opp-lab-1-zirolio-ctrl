@@ -61,6 +61,11 @@ public class SpreadsheetEngine
 
                 double evaluatedResult = ExpressionEvaluator.Evaluate(formulaBody, name =>
                 {
+                    if (!_expressions.TryGetValue(name, out var referencedExpr) || string.IsNullOrWhiteSpace(referencedExpr))
+                    {
+                        throw new InvalidOperationException($"Клітинка {name} порожня або не існує!");
+                    }
+                    
                     var evaluate = EvaluateCell(name);
                     if (double.TryParse(evaluate, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double num))
                     {

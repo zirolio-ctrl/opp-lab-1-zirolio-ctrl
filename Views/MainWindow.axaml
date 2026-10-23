@@ -43,6 +43,20 @@
             </Setter>
         </Style>
 
+        <Style Selector="Button.error">
+            <Setter Property="Foreground" Value="#dd2929"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+
+        <Style Selector="TextBlock#StatusLabel">
+            <Setter Property="Foreground" Value="#c7c7c7"/>
+        </Style>
+
+        <Style Selector="TextBlock#StatusLabel.error">
+            <Setter Property="Foreground" Value="#dd2929"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+
         <Style Selector="Border.cell Button:pointerover">
             <Setter Property="Background" Value="#3D3D3D"/>
             <Setter Property="Foreground" Value="#E0E0E0"/>
@@ -132,8 +146,8 @@
             </ScrollViewer>
         </Border>
 
-        <Border Grid.Row="2" Background="#303030" CornerRadius="6" Padding="8,4">
-            <TextBlock x:Name="StatusLabel" Text="Готово" FontSize="12" Foreground="Gray"/>
+        <Border Grid.Row="2" Background="#303030" CornerRadius="6" Padding="12,6">
+            <TextBlock x:Name="StatusLabel" Text="Готово" FontSize="12"/>
         </Border>
     </Grid>
 </Window>

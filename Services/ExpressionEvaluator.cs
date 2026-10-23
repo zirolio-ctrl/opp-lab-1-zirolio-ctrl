@@ -156,8 +156,7 @@ public sealed class ExpressionEvaluator
             if ((op == "/" || op == "div" || op == "mod") &&
                 right == 0)
             {
-                throw new DivideByZeroException(
-                    "Division by zero is not allowed.");
+                throw new DivideByZeroException("Division by zero is not allowed.");
             }
 
             left = op switch

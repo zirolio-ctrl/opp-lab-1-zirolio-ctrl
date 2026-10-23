@@ -34,10 +34,14 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         RenderGrid();
+
+        this.Closing += OnWindowClosing;
     }
 
     private void RenderGrid()
     {
+        StatusLabel.Classes.Remove("error");
+
         SpreadsheetGrid.RowDefinitions.Clear();
         SpreadsheetGrid.ColumnDefinitions.Clear();
         SpreadsheetGrid.Children.Clear();
@@ -101,6 +105,7 @@ public partial class MainWindow : Window
 
     private Border CreateCell(string cellName)
     {
+        bool error = false;
         string displayValue = "";
 
         try
@@ -115,6 +120,7 @@ public partial class MainWindow : Window
         }
         catch
         {
+            error = true;
             displayValue = "#ERROR!";
         }
 
@@ -124,6 +130,11 @@ public partial class MainWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Stretch,
         };
+
+        if (error)
+        {
+            button.Classes.Add("error");
+        }
 
         button.Click += (_, _) => SelectCell(cellName);
 
@@ -135,6 +146,7 @@ public partial class MainWindow : Window
         };
 
         border.Classes.Add("cell");
+        if (error) border.Classes.Add("error");
 
         return border;
     }
@@ -167,11 +179,86 @@ public partial class MainWindow : Window
         }
         catch (Exception ex)
         {
+            StatusLabel.Classes.Add("error");
             StatusLabel.Text = $"Помилка: {ex.Message}";
         }
 
         RenderGrid();
         FormulaEntry.Focus();
+    }
+
+    private async Task<bool> ConfirmSaveBeforeActionAsync()
+    {
+        var yesButton = new Button { Content = "Зберегти", Width = 95, HorizontalContentAlignment = Avalonia.Layout.HorizontalAlignment.Center };
+        var noButton = new Button { Content = "Ні", Width = 80, HorizontalContentAlignment = Avalonia.Layout.HorizontalAlignment.Center };
+        var cancelButton = new Button { Content = "Скасувати", Width = 100, HorizontalContentAlignment = Avalonia.Layout.HorizontalAlignment.Center };
+
+        var buttonsPanel = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            Spacing = 8,
+            Children = { cancelButton, noButton, yesButton }
+        };
+
+        var grid = new Grid
+        {
+            Margin = new Thickness(16),
+            RowDefinitions = new RowDefinitions("*, Auto"),
+            RowSpacing = 20
+        };
+
+        var messageBlock = new TextBlock
+        {
+            Text = "У вас є незбережені зміни. Бажаєте зберегти таблицю перед продовженням?",
+            TextWrapping = TextWrapping.Wrap,
+            VerticalAlignment = VerticalAlignment.Center,
+            FontSize = 14
+        };
+
+        Grid.SetRow(messageBlock, 0);
+        Grid.SetRow(buttonsPanel, 1);
+
+        grid.Children.Add(messageBlock);
+        grid.Children.Add(buttonsPanel);
+
+        var dialog = new Window
+        {
+            Title = "Підтвердження",
+            Width = 420,
+            Height = 170,
+            CanResize = false,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Content = grid
+        };
+
+        string result = "Cancel";
+
+        yesButton.Click += (_, _) => { result = "Yes"; dialog.Close(); };
+        noButton.Click += (_, _) => { result = "No"; dialog.Close(); };
+        cancelButton.Click += (_, _) => { result = "Cancel"; dialog.Close(); };
+
+        await dialog.ShowDialog(this);
+
+        if (result == "Yes")
+        {
+            OnExportClicked(this, new RoutedEventArgs());
+            return true;
+        }
+        
+        return result == "No";
+    }
+
+    private async void OnWindowClosing(object? sender, WindowClosingEventArgs e)
+    {
+        e.Cancel = true;
+
+        bool proceed = await ConfirmSaveBeforeActionAsync();
+        if (proceed)
+        {
+            Closing -= OnWindowClosing;
+            Close();
+        }
     }
 
     private GoogleDriveService GetGoogleDriveService()
@@ -181,6 +268,9 @@ public partial class MainWindow : Window
 
     private async void OnExportClicked(object? sender, RoutedEventArgs e)
     {
+        var btn = sender as Button;
+        btn?.IsEnabled = false;
+
         try
         {
             var file = new SpreadsheetFile
@@ -215,10 +305,24 @@ public partial class MainWindow : Window
         {
             StatusLabel.Text = $"Помилка експорту: {ex.Message}";
         }
+        finally
+        {
+            btn?.IsEnabled = true;
+        }
     }
 
     private async void OnImportClicked(object? sender, RoutedEventArgs e)
     {
+        bool proceed = await ConfirmSaveBeforeActionAsync();
+        if (!proceed)
+        {
+            StatusLabel.Text = "Імпорт скасовано.";
+            return;
+        }
+
+        var btn = sender as Button;
+        btn?.IsEnabled = false;
+
         try
         {
             StatusLabel.Text = "Завантаження списку файлів...";
@@ -270,6 +374,10 @@ public partial class MainWindow : Window
         {
             StatusLabel.Text = $"Помилка імпорту: {ex.Message}";
         }
+        finally
+        {
+            btn?.IsEnabled = true;
+        }
     }
 
     private async Task<DriveFile?> SelectDriveFileAsync(IList<DriveFile> files)
@@ -278,6 +386,13 @@ public partial class MainWindow : Window
         {
             ItemsSource = files.Select(f => f.Name).ToList(),
             SelectedIndex = files.Count > 0 ? 0 : -1
+        };
+
+        var scrollViewer = new ScrollViewer
+        {
+            VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
+            HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Disabled,
+            Content = list
         };
 
         var selectButton = new Button
@@ -300,17 +415,26 @@ public partial class MainWindow : Window
             Children = { cancelButton, selectButton }
         };
 
-        var panel = new StackPanel
+        var grid = new Grid
         {
-            Margin = new Thickness(12),
-            Spacing = 12,
-            Children =
-            {
-                new TextBlock { Text = "Виберіть таблицю з Google Drive:" },
-                list,
-                buttons
-            }
+            RowDefinitions = new RowDefinitions("Auto, *, Auto"),
+            RowSpacing = 12,
+            Margin = new Thickness(12)
         };
+
+        var titleBlock = new TextBlock 
+        { 
+            Text = "Виберіть таблицю з Google Drive:",
+            VerticalAlignment = VerticalAlignment.Center
+        };
+
+        Grid.SetRow(titleBlock, 0);
+        Grid.SetRow(scrollViewer, 1);
+        Grid.SetRow(buttons, 2);
+
+        grid.Children.Add(titleBlock);
+        grid.Children.Add(scrollViewer);
+        grid.Children.Add(buttons);
 
         var dialog = new Window
         {
@@ -318,7 +442,7 @@ public partial class MainWindow : Window
             Width = 420,
             Height = 350,
             WindowStartupLocation = WindowStartupLocation.CenterOwner,
-            Content = panel
+            Content = grid
         };
 
         selectButton.Click += (_, _) =>
@@ -349,8 +473,8 @@ public partial class MainWindow : Window
     private void OnAddRowClicked(object? sender, RoutedEventArgs e)
     {
         _rowCount++;
-        RenderGrid();
         StatusLabel.Text = $"Додано рядок. Всього рядків: {_rowCount}";
+        RenderGrid();
     }
 
     private void OnRemoveRowClicked(object? sender, RoutedEventArgs e)
@@ -364,16 +488,16 @@ public partial class MainWindow : Window
             }
 
             _rowCount--;
-            RenderGrid();
             StatusLabel.Text = $"Видалено рядок. Всього рядків: {_rowCount}";
+            RenderGrid();
         }
     }
 
     private void OnAddColClicked(object? sender, RoutedEventArgs e)
     {
         _colCount++;
-        RenderGrid();
         StatusLabel.Text = $"Додано стовпець. Всього стовпців: {_colCount}";
+        RenderGrid();
     }
 
     private void OnRemoveColClicked(object? sender, RoutedEventArgs e)
@@ -388,16 +512,16 @@ public partial class MainWindow : Window
             }
 
             _colCount--;
-            RenderGrid();
             StatusLabel.Text = $"Видалено стовпець. Всього стовпців: {_colCount}";
+            RenderGrid();
         }
     }
 
     private void OnClearTableClicked(object? sender, RoutedEventArgs e)
     {
         _engine.Clear();
-        RenderGrid();
         StatusLabel.Text = "Таблицю очищено";
+        RenderGrid();
     }
 
     private string GetColumnName(int colIndex)
