@@ -105,6 +105,10 @@
 
                     <Button Content="Імпорт" Click="OnImportClicked" ToolTip.Tip="Імпортувати дані з гугл диску"/>
                     <Button Content="Експорт" Click="OnExportClicked" ToolTip.Tip="Експортувати таблицю у гугл диск"/>
+
+                    <Separator Width="1" Background="#444" Margin="4,2"/>
+                    
+                    <Button Content="Довідка" Click="OnHelpClicked" ToolTip.Tip="Інструкція та правила використання"/>
                 </StackPanel>
 
                 <Grid Grid.Row="1" ColumnDefinitions="Auto, *, Auto" ColumnSpacing="10">

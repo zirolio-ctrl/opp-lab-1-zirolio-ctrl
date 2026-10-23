@@ -524,6 +524,70 @@ public partial class MainWindow : Window
         RenderGrid();
     }
 
+    private async void OnHelpClicked(object? sender, RoutedEventArgs e)
+    {
+        var helpText = new TextBlock
+        {
+            Text = 
+                "ДОДАТОК: ТАБЛИЧНИЙ ПРОЦЕСОР\n\n" +
+                "1. Робота з клітинками:\n" +
+                "   • Натисніть на будь-яку клітинку, щоб вибрати її та редагувати значення у полі введення зверху.\n" +
+                "   • Для введення формул використовуйте символ '=' на початку (наприклад: = A1 + B2 * 5).\n" +
+                "   • Підтримуються базові операції, пріоритети та степені (^).\n\n" +
+                "2. Обробка помилок:\n" +
+                "   • Порожні або неіснуючі клітинки, використані у формулах, викликають помилку (#ERROR!).\n" +
+                "   • Циклічні посилання (наприклад, A1 посилається на A2, а A2 на A1) блокуються системою.\n\n" +
+                "3. Структура таблиці:\n" +
+                "   • Ви можете додавати або видаляти рядки й стовпці за допомогою кнопок на панелі керування.\n\n" +
+                "4. Google Drive:\n" +
+                "   • Ви можете імпортувати раніше збережені таблиці з хмари або експортувати поточну роботу на Google Drive.",
+            TextWrapping = TextWrapping.Wrap,
+            FontSize = 13,
+            Foreground = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.Parse("#E0E0E0"))
+        };
+
+        var scrollViewer = new ScrollViewer
+        {
+            VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
+            HorizontalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Disabled,
+            Content = helpText
+        };
+
+        var closeButton = new Button
+        {
+            Content = "Зрозуміло",
+            Width = 100,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            HorizontalContentAlignment = Avalonia.Layout.HorizontalAlignment.Center
+        };
+
+        var grid = new Grid
+        {
+            Margin = new Thickness(16),
+            RowDefinitions = new RowDefinitions("*, Auto"),
+            RowSpacing = 16
+        };
+
+        Grid.SetRow(scrollViewer, 0);
+        Grid.SetRow(closeButton, 1);
+
+        grid.Children.Add(scrollViewer);
+        grid.Children.Add(closeButton);
+
+        var dialog = new Window
+        {
+            Title = "Довідка",
+            Width = 480,
+            Height = 360,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            Content = grid
+        };
+
+        closeButton.Click += (_, _) => dialog.Close();
+
+        await dialog.ShowDialog(this);
+    }
+
     private string GetColumnName(int colIndex)
     {
         string columnName = "";
